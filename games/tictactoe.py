@@ -3,10 +3,11 @@ from discord import User
 
 
 class TicTacToe(Game):
-    board: list[list[str]] = [["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]
 
     def __init__(self, players: tuple[User]) -> None:
         super(self.__class__, self).__init__(players)
+
+        self.board: list[list[str]] = [["-", "-", "-"], ["-", "-", "-"], ["-", "-", "-"]]
     
     def commands(self, sender: User, message: str) -> str:
         parts = message.split()
@@ -26,6 +27,8 @@ class TicTacToe(Game):
                     self.winner = self.currentPlayer
                     return self.displayFinish()
                 case "place":
+                    if len(parts) != 2:
+                        return "Invalid command!"
                     invalid = self.placeTicker(parts[1])
                     if invalid:
                         return "Invalid position!"

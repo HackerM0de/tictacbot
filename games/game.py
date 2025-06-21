@@ -5,12 +5,11 @@ from random import shuffle
 
 class Game(ABC):
 
-    players: list[User] = []
-    winner: User | None = None
-    gameOver: bool = False
-    currentTurn: int = 0
-
     def __init__(self, players: tuple[User]) -> None:
+        self.players: list[User] = []
+        self.winner: User | None = None
+        self.gameOver: bool = False
+        self.currentTurn: int = 0
         [self.players.append(p) for p in players]
         shuffle(self.players)
 

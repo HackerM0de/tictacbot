@@ -2,6 +2,7 @@ from games.game import Game
 from discord import User
 
 class Reversi(Game):
+    
     def __init__(self, players: tuple[User]) -> None:
         super().__init__(players)
         self.board: list[list[str]] = [["-" for _ in range(8)] for _ in range(8)]
