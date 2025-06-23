@@ -1,10 +1,11 @@
+import json
 import discord
-from games.tictactoe import TicTacToe
-from games.reversi import Reversi
-from games.snaketactoe import SnakeTacToe
-from games.game import Game
+from .games.tictactoe import TicTacToe
+from .games.reversi import Reversi
+from .games.snaketactoe import SnakeTacToe
+from .games.game import Game
 
-from duelbutton import DuelButton
+from .duelbutton import DuelButton
 
 from typing import Literal, TYPE_CHECKING
 if TYPE_CHECKING:
@@ -156,29 +157,12 @@ class Client(discord.Client):
                 description="Provides general info or specific info about a topic."
         )
         async def help(interaction: discord.Interaction, topic: Literal["how-to-play", "commands"] | None=None):
-            helpMessages = {
-                None: f"{self.user.mention} is a Discord Bot for turn based gaming.\n"
-                + "It lets users duel each other in various games.\n"
-                + "Use this help command to find out more about different topics.",
 
-                "how-to-play": "Guide to starting a match:\n"
-                + "```1. Send a duel request with /duel\n"
-                + "2. If you got a duel request, accept it.\n"
-                + "3. The game board will appear and show who goes first.\n"
-                + "4. Type in the game command (not / command) into the chat.\n"
-                + "5. If you don't know game commands, refer to the help menu.```",
-
-                "commands": "Bot commands:\n"
-                + "```Legend:\n"
-                + "/example param: Command \"example\" with required parameter \"param\"\n"
-                + "/example [param]: Command \"example\" with optional parameter \"param\"\n\n"
-                + "/help [topic]: Provides general info or specific info about a topic.\n"
-                + "/duel user game: Send a duel request to that user using that game.\n"
-                + "/elo [user]: Get the elo of the user, or you if there's no user.\n"
-                + "/leaderboard game: Get the top 10 players for a game.\n\n"
-
-                + "Game specific commands are in the game's help menu.\n```"
-            }
+            if topic is None:
+                topic = "null"
+                
+            with open("client/help.json") as f:
+                helpMessages = json.load(f)
 
             await interaction.response.send_message(helpMessages[topic])
 

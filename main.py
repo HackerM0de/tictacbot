@@ -1,5 +1,5 @@
-from client import Client
-from database import DataBase
+from client.client import Client
+from client.database import DataBase
 from dotenv import dotenv_values
 
 TOKEN = dotenv_values()["TOKEN"]

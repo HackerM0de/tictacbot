@@ -1,0 +1,5 @@
+{
+    "null": "I am a Discord Bot for turn based gaming.\nIt lets users duel each other in various games.\nUse this help command to find out more about different topics.",
+    "how-to-play": "Guide to starting a match:\n```1. Send a duel request with /duel\n2. If you got a duel request, accept it.\n3. The game board will appear and show who goes first.\n4. Type in the game command (not / command) into the chat.\n5. If you don't know game commands, refer to the help menu.```",
+    "commands": "Bot commands:\n```Legend:\n/example param: Command \"example\" with required parameter \"param\"\n/example [param]: Command \"example\" with optional parameter \"param\"\n\n/help [topic]: Provides general info or specific info about a topic.\n/duel user game: Send a duel request to that user using that game.\n/elo [user]: Get the elo of the user, or you if there's no user.\n/leaderboard game: Get the top 10 players for a game.\n\nGame specific commands are in the game's help menu.\n```"
+}

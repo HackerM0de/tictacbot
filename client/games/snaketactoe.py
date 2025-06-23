@@ -1,4 +1,4 @@
-from games.game import Game
+from .game import Game
 from discord import User
 
 

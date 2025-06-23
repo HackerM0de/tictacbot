@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from discord import User
 from random import shuffle
 from typing import TYPE_CHECKING
-from database import DataBase
+from ..database import DataBase
 
 
 class Game(ABC):
