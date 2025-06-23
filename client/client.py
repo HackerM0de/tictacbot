@@ -8,16 +8,16 @@ from .games.game import Game
 from .duelbutton import DuelButton
 
 from typing import Literal, TYPE_CHECKING
-if TYPE_CHECKING:
-    from database import DataBase
+from .database import DataBase
 
 class Client(discord.Client):
 
-    def __init__(self, channelName: str, db: "DataBase"=None):
+    def __init__(self, guildName: str| None=None, channelName: str | None=None, db: DataBase | None=None):
         super().__init__(intents=discord.Intents.all())
         self.games: list[Game] = []
         self.ratedGames = {"reversi", "snaketactoe"}
         self.duelRequests = set()
+        self.guildName = guildName
         self.channelName = channelName
         self.db = db
         self.tree = discord.app_commands.CommandTree(self)
@@ -59,6 +59,12 @@ class Client(discord.Client):
             """
 
             sender = interaction.user
+            if self.guildName is not None and interaction.guild.name != self.guildName:
+                await interaction.response.send_message("This command can't be used in this server.", ephemeral=True)
+                return
+            if self.channelName is not None and interaction.channel.name != self.channelName:
+                await interaction.response.send_message("This command can't be used in this channel.", ephemeral=True)
+                return
             if receiver.bot:
                 await interaction.response.send_message("You can't duel bots!", ephemeral=True)
                 return
@@ -111,6 +117,10 @@ class Client(discord.Client):
         async def elo(interaction: discord.Interaction, player: discord.User=None):
             player = player or interaction.user
 
+            if self.channelName is not None and interaction.channel.name != self.channelName:
+                await interaction.response.send_message("This command can't be used in this channel.", ephemeral=True)
+                return
+
             if self.db is None:
                 await interaction.response.send_message("Database is not enabled.", ephemeral=True)
                 return
@@ -135,6 +145,11 @@ class Client(discord.Client):
             description="Gets the top 10 players in a game."
         )
         async def leaderboard(interaction: discord.Interaction, game: Literal["reversi", "snaketactoe"]):
+
+            if self.channelName is not None and interaction.channel.name != self.channelName:
+                await interaction.response.send_message("This command can't be used in this channel.", ephemeral=True)
+                return
+
             if self.db is None:
                 await interaction.response.send_message("Database is not enabled.", ephemeral=True)
                 return
@@ -164,7 +179,7 @@ class Client(discord.Client):
             with open("client/help.json") as f:
                 helpMessages = json.load(f)
 
-            await interaction.response.send_message(helpMessages[topic])
+            await interaction.response.send_message(helpMessages[topic], ephemeral=True)
 
         @self.event
         async def on_ready():
@@ -176,7 +191,9 @@ class Client(discord.Client):
             sender = message.author
             if sender == self.user:
                 return
-            if message.channel.name != self.channelName:
+            if self.guildName is not None and message.guild.name != self.guildName:
+                return
+            if self.channelName is not None and message.channel.name != self.channelName:
                 return
             if not message.content:
                 return

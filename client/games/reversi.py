@@ -66,13 +66,14 @@ class Reversi(Game):
                     return self.displayInfo()
                 
     def showBoard(self) -> str:
-        eloX = "N/A"
-        eloO = "N/A"
         if hasattr(self, "db") and self.db is not None:
             eloX = self.db.getUserElo(self.players[0].id, "reversi") or "N/A"
             eloO = self.db.getUserElo(self.players[1].id, "reversi") or "N/A"
-        header = (f"{self.players[0].mention} (X) [{eloX}] vs "
-                  f"{self.players[1].mention} (O) [{eloO}]\n")
+            header = (f"{self.players[0].mention} (X) [{eloX}] vs "
+                    f"{self.players[1].mention} (O) [{eloO}]\n")
+        else:
+            header = (f"{self.players[0].mention} (X) vs "
+                    f"{self.players[1].mention} (O)\n")
         board = ["    A   B   C   D   E   F   G   H"]
         for i, row in enumerate(self.board):
             line = f"{i+1} | " + " | ".join(row) + " |"
