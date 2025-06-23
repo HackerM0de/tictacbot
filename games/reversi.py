@@ -3,8 +3,8 @@ from discord import User
 
 class Reversi(Game):
     
-    def __init__(self, players: tuple[User]) -> None:
-        super().__init__(players)
+    def __init__(self, players: tuple[User], db) -> None:
+        super().__init__(players, db)
         self.board: list[list[str]] = [["-" for _ in range(8)] for _ in range(8)]
         self.board[3][3] = "O"
         self.board[3][4] = "X"
@@ -16,18 +16,35 @@ class Reversi(Game):
         command = parts[0].lower()
         if self.currentPlayer != sender:
             match command:
-                case "forfeit":
+                case "resign":
                     self.gameOver = True
                     self.winner = self.currentPlayer
+                    self.currentTurn += 1
+                    loser = self.currentPlayer
+                    if hasattr(self, "db") and self.db is not None:
+                         self.db.updateElo(
+                            game="reversi",
+                            winnerId=self.winner.id,
+                            loserId=loser.id,
+                            isTie=False
+                        )
                     return self.displayFinish()
                 case _:
                     return ""
         else:
             match command:
-                case "forfeit":
+                case "resign":
                     self.gameOver = True
+                    loser = self.currentPlayer
                     self.currentTurn += 1
                     self.winner = self.currentPlayer
+                    if hasattr(self, "db") and self.db is not None:
+                         self.db.updateElo(
+                            game="reversi",
+                            winnerId=self.winner.id,
+                            loserId=loser.id,
+                            isTie=False
+                        )
                     return self.displayFinish()
                 case "place":
                     invalid = self.placeTicker(parts[1])
@@ -38,10 +55,10 @@ class Reversi(Game):
                         self.checkWin()
                         return self.displayFinish()
                     self.currentTurn += 1
-                    if not self.hasAnyValidMove(self.currentPlayer):
+                    if not self.hasAnyValidMove():
                         message = f"{self.currentPlayer.mention} has no moves!"
                         self.currentTurn += 1
-                        if not self.hasAnyValidMove(self.currentPlayer):
+                        if not self.hasAnyValidMove():
                             message = f"No valid moves left!"
                             self.checkWin()
                             return self.displayFinish(message)
@@ -49,7 +66,13 @@ class Reversi(Game):
                     return self.displayInfo()
                 
     def showBoard(self) -> str:
-        header = f"{self.players[0].mention} (X) vs {self.players[1].mention} (O)\n"
+        eloX = "N/A"
+        eloO = "N/A"
+        if hasattr(self, "db") and self.db is not None:
+            eloX = self.db.getUserElo(self.players[0].id, "reversi") or "N/A"
+            eloO = self.db.getUserElo(self.players[1].id, "reversi") or "N/A"
+        header = (f"{self.players[0].mention} (X) [{eloX}] vs "
+                  f"{self.players[1].mention} (O) [{eloO}]\n")
         board = ["    A   B   C   D   E   F   G   H"]
         for i, row in enumerate(self.board):
             line = f"{i+1} | " + " | ".join(row) + " |"
@@ -101,20 +124,13 @@ class Reversi(Game):
             if 0 <= ny < 8 and 0 <= nx < 8 and self.board[ny][nx] == player:
                 flips.extend(tempFlips)
         return flips
-    
-    def advanceTurn(self) -> str:
-        self.currentTurn += 1
-        if not self.hasAnyValidMove(self.currentPlayer):
-            self.currentTurn += 1
-            if not self.hasAnyValidMove(self.currentPlayer):
-                self.countPieces()
 
     def countPieces(self) -> tuple[int]:
         return (sum(
             cell == c for row in self.board for cell in row
             ) for c in "XO-")
     
-    def hasAnyValidMove(self, player: User):
+    def hasAnyValidMove(self):
         return any(
             bool(self.getFlips("XO"[self.currentTurn % 2], y, x))
             for y in range(8)
@@ -127,7 +143,29 @@ class Reversi(Game):
         self.gameOver = True
         if xCount > oCount:
             self.winner = self.players[0]
+            loser = self.players[1]
+            isTie = False
         elif oCount > xCount:
             self.winner = self.players[1]
+            loser = self.players[0]
+            isTie = False
         else:
             self.winner = None
+            loser = None
+            isTie = True
+
+        if hasattr(self, "db") and self.db is not None:
+            if isTie:
+                self.db.updateElo(
+                    game="reversi",
+                    winnerId=self.players[0].id,
+                    loserId=self.players[1].id,
+                    isTie=True
+                )
+            else:
+                self.db.updateElo(
+                    game="reversi",
+                    winnerId=self.winner.id,
+                    loserId=loser.id,
+                    isTie=False
+                )

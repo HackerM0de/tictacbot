@@ -1,12 +1,15 @@
 from abc import ABC, abstractmethod
 from discord import User
 from random import shuffle
+from typing import TYPE_CHECKING
+from database import DataBase
 
 
 class Game(ABC):
 
-    def __init__(self, players: tuple[User]) -> None:
+    def __init__(self, players: tuple[User], db: DataBase | None=None) -> None:
         self.players: list[User] = []
+        self.db = db
         self.winner: User | None = None
         self.gameOver: bool = False
         self.currentTurn: int = 0

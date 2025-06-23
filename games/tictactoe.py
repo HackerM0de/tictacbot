@@ -14,7 +14,7 @@ class TicTacToe(Game):
         command = parts[0].lower()
         if self.currentPlayer != sender:
             match command:
-                case "forfeit":
+                case "resign":
                     self.gameOver = True
                     self.winner = self.currentPlayer
                     return self.displayFinish()
@@ -22,7 +22,8 @@ class TicTacToe(Game):
                     return ""
         else:
             match command:
-                case "forfeit":
+                case "resign":
+                    self.gameOver = True
                     self.currentTurn += 1
                     self.winner = self.currentPlayer
                     return self.displayFinish()
@@ -58,11 +59,11 @@ class TicTacToe(Game):
 
     def showBoard(self) -> None:
         header = f"{self.players[0].mention} (X) vs {self.players[1].mention} (O)\n"
-        board = ["  A     B     C"]
+        board = ["   A     B     C  "]
         for row in range(3):
-            board.append("     |     |     ")
-            board.append(f"  { '  |  '.join(self.board[row])}  {row+1}")
-            board.append("_____|_____|_____" if row < 2 else "     |     |     ")
+            board.append("      |     |     ")
+            board.append(f"{row+1}  { '  |  '.join(self.board[row])}  ")
+            board.append(" _____|_____|_____" if row < 2 else "      |     |      ")
         return header + "```\n" + "\n".join(board) + "\n```"
 
     
@@ -83,9 +84,3 @@ class TicTacToe(Game):
         if all(cell != '-' for row in self.board for cell in row):
             self.gameOver = True
             self.winner = None
-
-
-
-if __name__ == "__main__":
-    game = TicTacToe(("A", "B"))
-    print(game.showBoard())
